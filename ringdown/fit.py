@@ -494,7 +494,7 @@ class Fit(object):
         """
         return cp.deepcopy(self)
 
-    def filter_data(self,chi,mass, **kwargs):
+    def filter_data(self,chi,mass,n, **kwargs):
         """Condition data for all detectors by calling
         :meth:`ringdown.data.Data.condition`. Docstring for that function
         below.
@@ -505,7 +505,7 @@ class Fit(object):
         """
         new_data = {}
         for k, d in self.data.items():
-            new_data[k] = d.apply_filter(chi,mass,**kwargs)
+            new_data[k] = d.apply_filter(chi,mass,n,**kwargs)
         self.data = new_data
     def condition_data(self, preserve_acfs=False, **kwargs):
         """Condition data for all detectors by calling
