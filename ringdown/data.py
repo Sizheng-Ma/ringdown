@@ -15,6 +15,7 @@ import pandas as pd
 import h5py
 import os
 import logging
+import qnm
 
 class Series(pd.Series):
     """ A wrapper of :class:`pandas.Series` with some additional functionality.
@@ -296,6 +297,21 @@ class Data(TimeSeries):
         else:
             d = None
         return d
+
+
+    @staticmethod
+    def _fac(ffreq,l,m,n,chi):
+        ome=qnm.modes_cache(s=-2,l=l,m=m,n=n)(a=chi)[0]
+        return (ffreq-ome)/(ffreq-np.conj(ome))*(ffreq+np.conj(ome))/(ffreq+ome)
+    def apply_filter(self,chi,mass):
+        raw_data = self.values
+        raw_time = self.index.values
+        fpsi422=np.fft.ifft(raw_data,norm='ortho')
+        t_unit=mass*2950./2/299792458
+        ffreq=np.fft.fftfreq(len(fpsi422),d=self.delta_t/t_unit)*2*np.pi
+        cond_data=np.real(np.fft.fft(self._fac(ffreq,2,2,0,chi)*fpsi422,norm='ortho'))
+        cond_time=raw_time + 2.3*t_unit
+        return Data(cond_data, index=cond_time, ifo=self.ifo)
 
     def condition(self, t0=None, ds=None, flow=None, fhigh=None, trim=0.25,
                   digital_filter=False, remove_mean=True, decimate_kws=None,
