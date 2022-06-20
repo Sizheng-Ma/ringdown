@@ -22,7 +22,7 @@ from . import waveforms
 
 Target = namedtuple('Target', ['t0', 'ra', 'dec', 'psi'])
 
-MODELS = ('ftau', 'mchi', 'mchi_aligned', 'mchiq')
+MODELS = ('ftau', 'mchi', 'mchi_aligned', 'mchiq','mchi_aligned_ftau')
 
 class Fit(object):
     """ A ringdown fit. Contains all the information required to setup and run
@@ -218,6 +218,14 @@ class Fit(object):
                 cosi_max=1,
                 flat_A=0
             ))
+        elif self.model == 'mchi_aligned_ftau':
+            default.update(dict(
+                M_min=None,
+                M_max=None,
+                chi_min=0,
+                chi_max=0.99,
+                flat_A=0
+            ))
         elif self.model == 'mchiq':
              default.update(dict(
                  M_min=None,
@@ -316,6 +324,8 @@ class Fit(object):
             return model.make_mchi_model(**self.model_input)
         elif self.model == 'mchi_aligned':
             return model.make_mchi_aligned_model(**self.model_input)
+        elif self.model == 'mchi_aligned_ftau':
+            return model.make_mchi_aligned_ftau_model(**self.model_input)
         elif self.model == 'ftau':
             return model.make_ftau_model(**self.model_input)
         else:
@@ -821,7 +831,7 @@ class Fit(object):
             # otherwise, assume it is a mode index list
             self._n_modes = None
             self.modes = qnms.construct_mode_list(modes)
-            if self.model == 'mchi_aligned':
+            if self.model == 'mchi_aligned' or self.modes == 'mchi_aligned_ftau':
                 ls_valid = [mode.l == 2 for mode in self.modes]
                 ms_valid = [abs(mode.m) == 2 for mode in self.modes]
                 if not (all(ls_valid) and all(ms_valid)):

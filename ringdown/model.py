@@ -1,4 +1,4 @@
-__all__ = ['make_mchi_model', 'make_mchi_aligned_model']
+__all__ = ['make_mchi_model', 'make_mchi_aligned_model','make_mchi_aligned_ftau_model']
 
 import aesara.tensor as at
 import aesara.tensor.slinalg as atl
@@ -155,6 +155,67 @@ def make_mchi_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_coeffs,
         # Flat prior on the delta-fs and delta-taus
 
         # Likelihood:
+        for i in range(ndet):
+            _ = pm.MvNormal(f"strain_{i}", mu=h_det[i,:], chol=Ls[i], observed=strains[i])
+        
+        return model
+
+def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_coeffs, **kwargs):
+    M_min = kwargs.pop("M_min")
+    M_max = kwargs.pop("M_max")
+    chi_min = kwargs.pop("chi_min")
+    chi_max = kwargs.pop("chi_max")
+    A_scale = kwargs.pop("A_scale")
+    flat_A = kwargs.pop("flat_A", True)
+
+    if (chi_min < 0) or (chi_max > 1):
+        raise ValueError("chi boundaries must be contained in [0, 1)")
+    
+    ndet = len(t0)
+    nmode = f_coeffs.shape[0]
+
+    with pm.Model() as model:
+        pm.ConstantData('times', times)
+        pm.ConstantData('t0', t0)
+        pm.ConstantData('L', Ls)
+
+        M = pm.Uniform("M", M_min, M_max)
+        chi = pm.Uniform("chi", chi_min, chi_max)
+
+        Ax_unit = pm.Flat("Ax_unit", shape=(nmode,))
+        Ay_unit = pm.Flat("Ay_unit", shape=(nmode,))
+
+        A = pm.Deterministic("A", A_scale*at.sqrt(at.square(Ax_unit)+at.square(Ay_unit)))
+        phi = pm.Deterministic("phi", at.arctan2(Ay_unit, Ax_unit))
+
+        f0 = FREF*MREF/M
+        f = pm.Deterministic('f', f0*chi_factors(chi, f_coeffs))
+        gamma = pm.Deterministic('gamma', f0*chi_factors(chi, g_coeffs))
+        tau = pm.Deterministic('tau', 1/gamma)
+        Q = pm.Deterministic('Q', np.pi*f*tau)
+
+        Apx = A*at.cos(phi)
+        Apy = A*at.sin(phi)
+
+        Acx = pm.Deterministic('Acx', Apx*0.0)
+        Acy = pm.Deterministic('Acy', Apy*0.0)
+
+        h_det_mode = pm.Deterministic("h_det_mode", compute_h_det_mode(t0, times, Fps, Fcs, f, gamma, Apx, Apy, Acx, Acy))
+        h_det = pm.Deterministic("h_det", at.sum(h_det_mode, axis=1))
+
+        # Priors:
+
+        # Flat in M-chi already
+
+        # Amplitude prior
+        if flat_A:
+            pm.Potential("flat_A_prior", -at.sum(at.log(A)))
+        else:
+            pm.Potential("gaussian_A_quadratures_prior", -0.5*at.sum(at.square(Ax_unit) + at.square(Ay_unit)))
+
+        # Flat prior on the delta-fs and delta-taus
+
+        # Likelihood
         for i in range(ndet):
             _ = pm.MvNormal(f"strain_{i}", mu=h_det[i,:], chol=Ls[i], observed=strains[i])
         
