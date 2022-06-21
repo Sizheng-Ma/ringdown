@@ -310,7 +310,7 @@ class Data(TimeSeries):
         t_unit=mass*2950./2/299792458
         ffreq=np.fft.fftfreq(len(fpsi422),d=self.delta_t/t_unit)*2*np.pi
         cond_data=np.real(np.fft.fft(self._fac(ffreq,2,2,n,chi)*fpsi422,norm='ortho'))
-        cond_time=raw_time + 2.3*t_unit
+        cond_time=raw_time + 0.0*t_unit
         return Data(cond_data, index=cond_time, ifo=self.ifo)
 
     def condition(self, t0=None, ds=None, flow=None, fhigh=None, trim=0.25,
