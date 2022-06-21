@@ -160,7 +160,7 @@ def make_mchi_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_coeffs,
         
         return model
 
-def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_coeffs, **kwargs):
+def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_coeffs, n_analyze, start_index, full_strains, **kwargs):
     M_min = kwargs.pop("M_min")
     M_max = kwargs.pop("M_max")
     chi_min = kwargs.pop("chi_min")
@@ -173,7 +173,6 @@ def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_c
     
     ndet = len(t0)
     nmode = f_coeffs.shape[0]
-
     with pm.Model() as model:
         pm.ConstantData('times', times)
         pm.ConstantData('t0', t0)
@@ -217,7 +216,8 @@ def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_c
 
         # Likelihood
         for i in range(ndet):
-            _ = pm.MvNormal(f"strain_{i}", mu=h_det[i,:], chol=Ls[i], observed=strains[i])
+            cut = full_strains[i][start_index[i]:start_index[i]+n_analyze]
+            _ = pm.MvNormal(f"strain_{i}", mu=h_det[i,:], chol=Ls[i], observed=cut)
         
         return model
         

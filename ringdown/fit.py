@@ -181,6 +181,26 @@ class Fit(object):
         return data
 
     @property
+    def full_data(self) -> dict:
+        """Slice of data to be analyzed for each detector. Extracted from
+        :attr:`Fit.data` based on information in analysis target
+        :attr:`Fit.target`.
+        """
+        data = {}
+        i0s = self.start_indices
+        for i, d in self.data.items():
+            data[i] = d
+        return data
+
+    @property
+    def get_index(self) -> dict:
+        data = {}
+        i0s = self.start_indices
+        for i, d in self.data.items():
+            data[i] = i0s[i]
+        return data
+
+    @property
     def _default_prior(self):
         default = {'A_scale': None}
         if self.model == 'ftau':
@@ -284,6 +304,8 @@ class Fit(object):
             self.compute_acfs()
 
         data_dict = self.analysis_data
+        full_data_dict = self.full_data
+        index_dict = self.get_index
 
         fpfc = self.antenna_patterns.values()
         fp = [x[0] for x in fpfc]
@@ -297,7 +319,10 @@ class Fit(object):
             t0=list(self.start_times.values()),
             times=[array(d.time) for d in data_dict.values()],
             strains=[s.values for s in data_dict.values()],
+            full_strains=[s.values for s in full_data_dict.values()],
+            start_index=[s for s in index_dict.values()],
             Ls=[a.iloc[:self.n_analyze].cholesky for a in self.acfs.values()],
+            n_analyze=self.n_analyze,
             Fps = fp,
             Fcs = fc
         )
