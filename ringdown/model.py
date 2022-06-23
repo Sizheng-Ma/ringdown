@@ -12,8 +12,7 @@ MREF = 68.0
 
 def fac(ffreq,re,im):
     ome=re+im*1j
-    return (ffreq+1)/(ffreq+1)
-    #return (ffreq-ome)/(ffreq-np.conj(ome))*(ffreq+np.conj(ome))/(ffreq+ome)
+    return (ffreq-ome)/(ffreq-np.conj(ome))*(ffreq+np.conj(ome))/(ffreq+ome)
 
 def rd(ts, f, gamma, Apx, Apy, Acx, Acy, Fp, Fc):
     """Generate a ringdown waveform as it appears in a detector.
@@ -222,25 +221,16 @@ def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_c
         # Flat prior on the delta-fs and delta-taus
 
         t_unit=M*2950./2/299792458
-        N = 1024
-        box = np.zeros((1, N), dtype='float64')
-        box[:, N//2-10: N//2+10] = 0
-        alpha = pm.Normal("alpha", mu=0, sigma=10)
         # Likelihood
         for i in range(ndet):
             deltatimes=times[i][1]-times[i][0]
             fpsi422=np.fft.irfft(full_strains[i],norm='ortho')
             ffreq = np.fft.fftfreq(len(fpsi422),d=deltatimes/t_unit)*2*np.pi
             filter_eval = fac(ffreq=ffreq,re=0,im=0)
-            cond_data=fft.rfft(filter_eval*np.array([fpsi422]),norm='ortho')[0][:,0]
-            #cond_data = np.sum(np.fft.rfft(box, norm='ortho'))
-            print(cond_data)
-            #cond_data = pm.Deterministic('cond_data',np.real(fft.np.fft.fft(filter_eval*fpsi422,norm='ortho')))
-            #ffreq=np.fft.fftfreq(len(fpsi422),d=deltatimes/t_unit)*2*np.pi
-            #filter_eval=fac(ffreq=ffreq,re=0,im=0)
-            #cond_data=np.real(np.fft.fft(filter_eval*fpsi422,norm='ortho'))
-            cut = cond_data[start_index[i]:start_index[i]+n_analyze]
-            _ = pm.MvNormal(f"strain_{i}", mu=h_det[i,:]-cut,chol=Ls[i],observed=strains[i])
+            cond_data=fft.rfft(filter_eval*np.array([fpsi422]),norm='ortho')[0]
+            cond_data_new=at.real(cond_data[:,0]+1j*cond_data[:,1])
+            cut = cond_data_new[start_index[i]:start_index[i]+n_analyze]
+            _ = pm.MvNormal(f"strain_{i}",mu=h_det[i,:]-cut,chol=Ls[i],observed=0.*strains[i])
         
         return model
         
