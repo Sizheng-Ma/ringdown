@@ -224,12 +224,13 @@ def make_mchi_aligned_ftau_model(t0, times, strains, Ls, Fps, Fcs, f_coeffs, g_c
         # Likelihood
         for i in range(ndet):
             deltatimes=times[i][1]-times[i][0]
-            fpsi422=np.fft.irfft(full_strains[i],norm='ortho')
-            ffreq = np.fft.fftfreq(len(fpsi422),d=deltatimes/t_unit)*2*np.pi
-            filter_eval = fac(ffreq=ffreq,re=0,im=0)
-            cond_data=fft.rfft(filter_eval*np.array([fpsi422]),norm='ortho')[0]
-            cond_data_new=at.real(cond_data[:,0]+1j*cond_data[:,1])
-            cut = cond_data_new[start_index[i]:start_index[i]+n_analyze]
+            fpsi422=np.fft.rfft(full_strains[i],norm='ortho')
+            ffreq = np.fft.rfftfreq(len(full_strains[i]),d=deltatimes/t_unit)*2*np.pi
+            filter_eval = fac(ffreq=-ffreq,re=0,im=0)
+            filtered_waveform=filter_eval*fpsi422
+            final=at.stack([at.transpose(at.stack([at.real(filtered_waveform),at.imag(filtered_waveform)]))])
+            cond_data=fft.irfft(final,norm='ortho')[0]
+            cut = cond_data[start_index[i]:start_index[i]+n_analyze]
             _ = pm.MvNormal(f"strain_{i}",mu=h_det[i,:]-cut,chol=Ls[i],observed=0.*strains[i])
         
         return model
