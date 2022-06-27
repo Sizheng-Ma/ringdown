@@ -306,10 +306,10 @@ class Data(TimeSeries):
     def apply_filter(self,chi,mass,n):
         raw_data = self.values
         raw_time = self.index.values
-        fpsi422=np.fft.ifft(raw_data,norm='ortho')
+        fpsi422=np.fft.rfft(raw_data,norm='ortho')
         t_unit=mass*2950./2/299792458
-        ffreq=np.fft.fftfreq(len(fpsi422),d=self.delta_t/t_unit)*2*np.pi
-        cond_data=np.real(np.fft.fft(self._fac(ffreq,2,2,n,chi)*fpsi422,norm='ortho'))
+        ffreq=np.fft.rfftfreq(len(raw_data),d=self.delta_t/t_unit)*2*np.pi
+        cond_data=np.real(np.fft.irfft(self._fac(-ffreq,2,2,n,chi)*fpsi422,norm='ortho'))
         cond_time=raw_time + 0.0*t_unit
         return Data(cond_data, index=cond_time, ifo=self.ifo)
 
