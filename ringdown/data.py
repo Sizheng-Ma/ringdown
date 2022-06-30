@@ -309,7 +309,7 @@ class Data(TimeSeries):
         fpsi422=np.fft.rfft(raw_data,norm='ortho')
         t_unit=mass*2950./2/299792458
         ffreq=np.fft.rfftfreq(len(raw_data),d=self.delta_t/t_unit)*2*np.pi
-        cond_data=np.real(np.fft.irfft(self._fac(-ffreq,2,2,n,chi)*fpsi422,norm='ortho'))
+        cond_data=np.fft.irfft(self._fac(-ffreq,2,2,n,chi)*fpsi422,norm='ortho',n=len(raw_data))
         cond_time=raw_time + 0.0*t_unit
         return Data(cond_data, index=cond_time, ifo=self.ifo)
 
