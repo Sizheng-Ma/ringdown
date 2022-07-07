@@ -303,13 +303,13 @@ class Data(TimeSeries):
     def _fac(ffreq,l,m,n,chi):
         ome=qnm.modes_cache(s=-2,l=l,m=m,n=n)(a=chi)[0]
         return (ffreq-ome)/(ffreq-np.conj(ome))*(ffreq+np.conj(ome))/(ffreq+ome)
-    def apply_filter(self,chi,mass,n):
+    def apply_filter(self,chi,mass,l,m,n):
         raw_data = self.values
         raw_time = self.index.values
         fpsi422=np.fft.rfft(raw_data,norm='ortho')
         t_unit=mass*2950./2/299792458
         ffreq=np.fft.rfftfreq(len(raw_data),d=self.delta_t/t_unit)*2*np.pi
-        cond_data=np.fft.irfft(self._fac(-ffreq,2,2,n,chi)*fpsi422,norm='ortho',n=len(raw_data))
+        cond_data=np.fft.irfft(self._fac(-ffreq,l,m,n,chi)*fpsi422,norm='ortho',n=len(raw_data))
         cond_time=raw_time + 0.0*t_unit
         return Data(cond_data, index=cond_time, ifo=self.ifo)
 

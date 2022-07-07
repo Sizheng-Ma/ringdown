@@ -504,7 +504,7 @@ class Fit(object):
         """
         return cp.deepcopy(self)
 
-    def filter_data(self,chi,mass,n, **kwargs):
+    def filter_data(self,chi,mass,l,m,n, **kwargs):
         """Condition data for all detectors by calling
         :meth:`ringdown.data.Data.condition`. Docstring for that function
         below.
@@ -515,7 +515,7 @@ class Fit(object):
         """
         new_data = {}
         for k, d in self.data.items():
-            new_data[k] = d.apply_filter(chi,mass,n,**kwargs)
+            new_data[k] = d.apply_filter(chi,mass,l,m,n,**kwargs)
         self.data = new_data
     def condition_data(self, preserve_acfs=False, **kwargs):
         """Condition data for all detectors by calling
@@ -832,8 +832,8 @@ class Fit(object):
             self._n_modes = None
             self.modes = qnms.construct_mode_list(modes)
             if self.model == 'mchi_aligned' or self.modes == 'mchi_aligned_ftau':
-                ls_valid = [mode.l == 2 for mode in self.modes]
-                ms_valid = [abs(mode.m) == 2 for mode in self.modes]
+                ls_valid = [((mode.l == 2) or (mode.l == 3)) for mode in self.modes]
+                ms_valid = [((abs(mode.m) == 2) or (abs(mode.m) == 3)) for mode in self.modes]
                 if not (all(ls_valid) and all(ms_valid)):
                     raise ValueError("mchi_aligned model only accepts l=m=2 modes")
 
