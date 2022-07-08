@@ -275,6 +275,11 @@ class Fit(object):
                 raise ValueError('{} is not a valid model argument.'
                                  'Valid options are: {}'.format(k, valid_keys))
 
+    def obtain_L(self):
+         Ls=[a.iloc[:self.n_analyze].cholesky for a in self.acfs.values()]
+         return np.array(Ls)
+        
+
     @property
     def model_input(self) -> dict:
         """Arguments to be passed to sampler.
