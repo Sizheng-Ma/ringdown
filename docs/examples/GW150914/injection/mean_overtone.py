@@ -136,12 +136,13 @@ tfinal,signal,ffreq,fpsi422,t_unit=inject_gau(distance=0.008,M_tot=M_est_total)
 h_raw_strain =ringdown.Data(signal, index=tfinal)
 
 chispace=np.arange(0.1,0.95,0.02)
-massspace=np.arange(34,100,0.5)
+massspace=np.arange(34,140,0.5)
 X, Y = np.meshgrid(massspace,chispace)
-distance=[]
 mass_max_clu=[]
 spin_max_clu=[]
-for t_init in np.arange(-5,60,0.5):
+distance=[]
+tssss=np.arange(-5,7,0.5)
+for t_init in tssss:
         finalfinal=[]
         for j in chispace:
             final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
@@ -152,6 +153,7 @@ for t_init in np.arange(-5,60,0.5):
         spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
         mass_max_clu.append(mass_max)
         spin_max_clu.append(spin_max)
-np.savetxt('time_rest/mass_overtone',mass_max_clu)
-np.savetxt('time_rest/spin_overtone',spin_max_clu)
+np.savetxt('time_rest/mass1_overtone',mass_max_clu)
+np.savetxt('time_rest/spin1_overtone',spin_max_clu)
+np.savetxt('time_rest/tinit1_overtone',tssss)
 
