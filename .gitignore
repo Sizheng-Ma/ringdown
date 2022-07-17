@@ -15,6 +15,8 @@ __pycache__/
 build/
 rest/
 time_rest/
+time_rest_new/
+m-chi-old-sampling/
 develop-eggs/
 dist/
 downloads/
