@@ -65,14 +65,26 @@ def total(M_est,chi_est,t_init):
     likelihood=compute_likelihood(fit1,wd1)
     return likelihood
 
-t_init=10
+#t_init=0.8
 
 chispace=np.arange(0.1,0.95,0.02)
 massspace=np.arange(34,240,0.5)
-
-finalfinal=[]
-for j in chispace:
-    final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
-    finalfinal.append(final)
-finalfinal=np.array(finalfinal)
-np.savetxt('rest/t_'+str(t_init),finalfinal)
+X, Y = np.meshgrid(massspace,chispace)
+mass_max_clu=[]
+spin_max_clu=[]
+distance=[]
+tssss=np.arange(-5,8,0.5)
+for t_init in tssss:
+        finalfinal=[]
+        for j in chispace:
+            final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
+            finalfinal.append(final)
+        finalfinal=np.array(finalfinal)
+        finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
+        mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        mass_max_clu.append(mass_max)
+        spin_max_clu.append(spin_max)
+np.savetxt('time_rest/mass1',mass_max_clu)
+np.savetxt('time_rest/spin1',spin_max_clu)
+np.savetxt('time_rest/tinit1',tssss)

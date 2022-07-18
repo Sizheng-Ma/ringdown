@@ -102,7 +102,8 @@ def set_data(M_est,chi_est,t_init):
     fit1.add_data(h_raw_strain, acf=acf)
     
     t_unit=M_est_total*Mf*2950./2/299792458
-    t0=t_init*t_unit
+    #t0=t_init*t_unit
+    t0=t_init*1e-3
     T = 0.08
     fit1.set_target(t0, duration=T)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)),flow=20,preserve_acfs=True)
@@ -132,7 +133,7 @@ def total(M_est,chi_est,t_init):
 
 Mf=0.952032939704
 M_est_total=68.5/Mf
-tfinal,signal,ffreq,fpsi422,t_unit=inject_gau(distance=0.008,M_tot=M_est_total)
+tfinal,signal,ffreq,fpsi422,t_unit=inject_gau(distance=0.06,M_tot=M_est_total)
 h_raw_strain =ringdown.Data(signal, index=tfinal)
 
 chispace=np.arange(0.1,0.95,0.02)
@@ -141,7 +142,7 @@ X, Y = np.meshgrid(massspace,chispace)
 mass_max_clu=[]
 spin_max_clu=[]
 distance=[]
-tssss=np.arange(-5,7,0.5)
+tssss=np.arange(-5,8,0.5)
 for t_init in tssss:
         finalfinal=[]
         for j in chispace:

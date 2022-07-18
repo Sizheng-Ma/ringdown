@@ -37,7 +37,7 @@ def set_data(M_est,chi_est,t_init):
 duration=T+ts_ins)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
-    #fit1.filter_data(chi_est,M_est,2,2,1)
+    fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
     fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,
@@ -75,4 +75,4 @@ for j in chispace:
     final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
     finalfinal.append(final)
 finalfinal=np.array(finalfinal)
-np.savetxt('rest/t_'+str(t_init),finalfinal)
+np.savetxt('rest/overtone_t_'+str(t_init),finalfinal)

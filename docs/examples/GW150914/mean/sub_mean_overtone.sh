@@ -10,4 +10,4 @@
 ##SBATCH -p debug
 
 source activate ringdown
-~/.conda/envs/ringdown/bin/python3 time_filter_likelihood.py
+~/.conda/envs/ringdown/bin/python3 mean_overtone1.py

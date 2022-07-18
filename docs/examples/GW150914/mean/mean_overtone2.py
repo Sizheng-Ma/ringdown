@@ -37,7 +37,7 @@ def set_data(M_est,chi_est,t_init):
 duration=T+ts_ins)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
-    #fit1.filter_data(chi_est,M_est,2,2,1)
+    fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
     fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,
@@ -68,24 +68,24 @@ def total(M_est,chi_est,t_init):
 #t_init=0.8
 
 chispace=np.arange(0.1,0.95,0.02)
-massspace=np.arange(34,100,0.5)
+massspace=np.arange(34,240,0.5)
 X, Y = np.meshgrid(massspace,chispace)
 mass_max_clu=[]
 spin_max_clu=[]
 distance=[]
-for t_init in np.arange(-5,8,0.25):
+tssss=np.arange(8,16,0.5)
+for t_init in tssss:
 
         finalfinal=[]
         for j in chispace:
             final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
             finalfinal.append(final)
         finalfinal=np.array(finalfinal)
-        true=total(68.5,0.69,t_init)
-        distance.append(true-np.max(finalfinal))
-        #mass_max=X.flatten()[np.argmax(finalfinal.flatten())]
-        #spin_max=Y.flatten()[np.argmax(finalfinal.flatten())]
-        #mass_max_clu.append(mass_max)
-        #spin_max_clu.append(spin_max)
-#np.savetxt('time_rest/mass',mass_max_clu)
-#np.savetxt('time_rest/spin',spin_max_clu)
-np.savetxt('time_rest/distance',distance)
+        finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
+        mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        mass_max_clu.append(mass_max)
+        spin_max_clu.append(spin_max)
+np.savetxt('time_rest/mass2_overtone',mass_max_clu)
+np.savetxt('time_rest/spin2_overtone',spin_max_clu)
+np.savetxt('time_rest/tinit2_overtone',tssss)

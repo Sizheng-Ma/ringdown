@@ -68,12 +68,12 @@ def total(M_est,chi_est,t_init):
 #t_init=0.8
 
 chispace=np.arange(0.1,0.95,0.02)
-massspace=np.arange(34,140,0.5)
+massspace=np.arange(34,240,0.5)
 X, Y = np.meshgrid(massspace,chispace)
 mass_max_clu=[]
 spin_max_clu=[]
 distance=[]
-tssss=np.arange(16,32,0.5)
+tssss=np.arange(8,16,0.5)
 for t_init in tssss:
         finalfinal=[]
         for j in chispace:
@@ -85,6 +85,6 @@ for t_init in tssss:
         spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
         mass_max_clu.append(mass_max)
         spin_max_clu.append(spin_max)
-np.savetxt('time_rest/mass3',mass_max_clu)
-np.savetxt('time_rest/spin3',spin_max_clu)
-np.savetxt('time_rest/tinit3',tssss)
+np.savetxt('time_rest/mass2',mass_max_clu)
+np.savetxt('time_rest/spin2',spin_max_clu)
+np.savetxt('time_rest/tinit2',tssss)
