@@ -9,41 +9,26 @@ import seaborn as sns
 import ringdown
 from joblib import Parallel, delayed
 
-def read_strain(file, dname):
-    with h5py.File(file, 'r') as f:
-        t0 = f['meta/GPSstart'][()]
-        T = f['meta/Duration'][()]
-        h = f['strain/Strain'][:]
-    
-        dt = T/len(h)
-    
-        raw_strain = ringdown.Data(h, index=t0 + dt*arange(len(h)), ifo=dname)
-        
-        return raw_strain
-    
-h_raw_strain = read_strain('H-H1_GWOSC_16KHZ_R1-1126259447-32.hdf5', 'H1')
-l_raw_strain = read_strain('L-L1_GWOSC_16KHZ_R1-1126259447-32.hdf5', 'L1')
-
-T = 0.08
+T = 2
 srate = 2048
 
+tfinal=np.arange(-T/2,T/2,1./srate)
+rng = np.random.default_rng(12345)
+signal=rng.normal(0, 1, len(tfinal))
+h_raw_strain =ringdown.Data(signal, index=tfinal)
+
 def set_data(M_est,chi_est,t_init):
+    acf = ringdown.AutoCovariance(zeros_like(signal),delta_t=h_raw_strain.delta_t)
+    acf.iloc[0] = 1
     fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 1)])
-    fit1.add_data(h_raw_strain)
-    fit1.add_data(l_raw_strain)
+    fit1.add_data(h_raw_strain, acf=acf)
+    
+    
     t_unit=M_est*2950./2/299792458
-    ts_ins=0.125
-    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82,
-duration=T+ts_ins)
-    fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
+    t0=t_init*1e-3
     fit1.filter_data(chi_est,M_est,2,2,0)
-    #fit1.filter_data(chi_est,M_est,2,2,1)
-#     fit1.filter_data(chi_est,M_est,2,2,2)
-#     fit1.filter_data(chi_est,M_est,2,2,3)
-    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,
-duration=T)
-    fit1.condition_data(ds=1, flow=20)
-    fit1.compute_acfs()
+#     fit1.filter_data(chi_est,M_est,2,2,1)
+    fit1.set_target(t0, duration=0.08)
     wd1 = fit1.analysis_data
     return fit1,wd1
 
@@ -65,7 +50,7 @@ def total(M_est,chi_est,t_init):
     likelihood=compute_likelihood(fit1,wd1)
     return likelihood
 
-t_init=10
+t_init=21
 
 chispace=np.arange(0.1,0.95,0.02)
 massspace=np.arange(34,240,0.5)
@@ -80,4 +65,4 @@ mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnor
 spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
 epsilong=np.sqrt(((mass_max-68.5)/68.5)**2+(spin_max-0.69)**2)
 print(epsilong)
-np.savetxt('rest/t_'+str(t_init),finalfinal)
+np.savetxt('noise_rest/t_'+str(t_init),finalfinal)

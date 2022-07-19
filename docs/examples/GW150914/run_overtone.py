@@ -69,10 +69,15 @@ t_init=10
 
 chispace=np.arange(0.1,0.95,0.02)
 massspace=np.arange(34,240,0.5)
-
+X, Y = np.meshgrid(massspace,chispace)
 finalfinal=[]
 for j in chispace:
     final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
     finalfinal.append(final)
 finalfinal=np.array(finalfinal)
+finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
+mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+epsilong=np.sqrt(((mass_max-68.5)/68.5)**2+(spin_max-0.69)**2)
+print(epsilong)
 np.savetxt('rest/overtone_t_'+str(t_init),finalfinal)

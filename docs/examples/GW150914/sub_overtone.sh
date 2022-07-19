@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH -J 7
-#SBATCH -o rest/7out
+#SBATCH -o rest/7outover
 #SBATCH -e rest/error.txt
 #SBATCH -N 1
 #SBATCH -n 24
