@@ -17,6 +17,8 @@ rest/
 time_rest/
 time_rest_new/
 m-chi-old-sampling/
+noise_time_rest/
+noise_rest/
 develop-eggs/
 dist/
 downloads/
