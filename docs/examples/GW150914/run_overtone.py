@@ -24,7 +24,7 @@ def read_strain(file, dname):
 h_raw_strain = read_strain('H-H1_GWOSC_16KHZ_R1-1126259447-32.hdf5', 'H1')
 l_raw_strain = read_strain('L-L1_GWOSC_16KHZ_R1-1126259447-32.hdf5', 'L1')
 
-T = 0.08
+T = 0.2
 srate = 2048
 
 def set_data(M_est,chi_est,t_init):
@@ -65,10 +65,10 @@ def total(M_est,chi_est,t_init):
     likelihood=compute_likelihood(fit1,wd1)
     return likelihood
 
-t_init=10
+t_init=4.1
 
-chispace=np.arange(0.1,0.95,0.02)
-massspace=np.arange(34,240,0.5)
+chispace=np.arange(0.0,0.95,0.005)
+massspace=np.arange(34,100,0.1)
 X, Y = np.meshgrid(massspace,chispace)
 finalfinal=[]
 for j in chispace:

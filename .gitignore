@@ -23,6 +23,12 @@ develop-eggs/
 dist/
 downloads/
 eggs/
+220_1/
+220_2/
+2201/
+221_1/
+all/
+all_1/
 .eggs/
 lib/
 lib64/
