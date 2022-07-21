@@ -1,0 +1,31 @@
+ERROR:aesara.graph.opt:Optimization failure due to: constant_folding
+ERROR:aesara.graph.opt:node: InplaceDimShuffle{}(TensorConstant{(1,) of 2})
+ERROR:aesara.graph.opt:TRACEBACK:
+ERROR:aesara.graph.opt:Traceback (most recent call last):
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/graph/opt.py", line 1861, in process_node
+    replacements = lopt.transform(fgraph, node)
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/graph/opt.py", line 1066, in transform
+    return self.fn(fgraph, node)
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/tensor/basic_opt.py", line 2868, in constant_folding
+    thunk = node.op.make_thunk(node, storage_map, compute_map, no_recycling=[])
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/op.py", line 131, in make_thunk
+    return self.make_c_thunk(node, storage_map, compute_map, no_recycling)
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/op.py", line 96, in make_c_thunk
+    outputs = cl.make_thunk(
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/basic.py", line 1198, in make_thunk
+    cthunk, module, in_storage, out_storage, error_storage = self.__compile__(
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/basic.py", line 1133, in __compile__
+    thunk, module = self.cthunk_factory(
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/basic.py", line 1629, in cthunk_factory
+    module = get_module_cache().module_from_key(key=key, lnk=self)
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/basic.py", line 55, in get_module_cache
+    return _get_module_cache(config.compiledir, init_args=init_args)
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/cmodule.py", line 1627, in get_module_cache
+    _module_cache = ModuleCache(dirname, **init_args)
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/cmodule.py", line 712, in __init__
+    self.refresh()
+  File "/home/sma/.conda/envs/ringdown/lib/python3.10/site-packages/aesara/link/c/cmodule.py", line 806, in refresh
+    files = os.listdir(root)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/sma/.aesara/compiledir_Linux-3.10-el7.x86_64-x86_64-with-glibc2.17-x86_64-3.10.5-64/tmp03jgml00'
+
+ERROR:pymc:There was 1 divergence after tuning. Increase `target_accept` or reparameterize.

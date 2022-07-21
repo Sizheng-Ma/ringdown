@@ -1,0 +1,1 @@
+ERROR:pymc:There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
