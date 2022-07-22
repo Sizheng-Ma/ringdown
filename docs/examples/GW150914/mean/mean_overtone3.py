@@ -67,25 +67,28 @@ def total(M_est,chi_est,t_init):
 
 #t_init=0.8
 
-chispace=np.arange(0.1,0.95,0.02)
+chispace=np.arange(0.0,0.95,0.02)
 massspace=np.arange(34,240,0.5)
 X, Y = np.meshgrid(massspace,chispace)
 mass_max_clu=[]
 spin_max_clu=[]
+bayes_clu=[]
 distance=[]
 tssss=np.arange(16,32,0.5)
 for t_init in tssss:
-
         finalfinal=[]
         for j in chispace:
             final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
             finalfinal.append(final)
         finalfinal=np.array(finalfinal)
+        bayes=np.sum(np.exp(finalfinal))
         finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
         mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
         spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
         mass_max_clu.append(mass_max)
         spin_max_clu.append(spin_max)
+        bayes_clu.append(bayes)
 np.savetxt('time_rest/mass3_overtone',mass_max_clu)
 np.savetxt('time_rest/spin3_overtone',spin_max_clu)
 np.savetxt('time_rest/tinit3_overtone',tssss)
+np.savetxt('time_rest/bayes3_overtone',bayes_clu)
