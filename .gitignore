@@ -19,8 +19,17 @@ time_rest_new/
 m-chi-old-sampling/
 noise_time_rest/
 noise_rest/
+rest_finer/
+time_rest_bayes/
 develop-eggs/
 dist/
+all/
+2201/
+220_1/
+220_2/
+221_1/
+221_2/
+all_1/
 downloads/
 eggs/
 #220_1/
