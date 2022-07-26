@@ -24,7 +24,7 @@ def read_strain(file, dname):
 h_raw_strain = read_strain('H-H1_GWOSC_16KHZ_R1-1126259447-32.hdf5', 'H1')
 l_raw_strain = read_strain('L-L1_GWOSC_16KHZ_R1-1126259447-32.hdf5', 'L1')
 
-T = 0.08
+T = 0.2
 srate = 2048
 
 def set_data(M_est,chi_est,t_init):
@@ -33,16 +33,14 @@ def set_data(M_est,chi_est,t_init):
     fit1.add_data(l_raw_strain)
     t_unit=M_est*2950./2/299792458
     ts_ins=0.125
-    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82,
-duration=T+ts_ins)
+    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82, duration=T+ts_ins)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
     #fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
-    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,
-duration=T)
-    fit1.condition_data(ds=1, flow=20)
+    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
+    #fit1.condition_data(ds=1, flow=20)
     fit1.compute_acfs()
     wd1 = fit1.analysis_data
     return fit1,wd1
@@ -77,6 +75,7 @@ distance=[]
 tssss=np.arange(-5,8,0.5)
 for t_init in tssss:
         finalfinal=[]
+        print(t_init)
         for j in chispace:
             final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
             finalfinal.append(final)

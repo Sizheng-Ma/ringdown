@@ -32,16 +32,12 @@ def set_data(M_est,chi_est,t_init):
     fit1.add_data(h_raw_strain)
     fit1.add_data(l_raw_strain)
     t_unit=M_est*2950./2/299792458
-    ts_ins=0.125
-    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82,
-duration=T+ts_ins)
+    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,duration=T)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
     fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
-    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,
-duration=T)
     fit1.condition_data(ds=1, flow=20)
     fit1.compute_acfs()
     wd1 = fit1.analysis_data
@@ -65,7 +61,7 @@ def total(M_est,chi_est,t_init):
     likelihood=compute_likelihood(fit1,wd1)
     return likelihood
 
-t_init=4.1
+t_init=0.84
 
 chispace=np.arange(0.0,0.95,0.005)
 massspace=np.arange(34,100,0.1)

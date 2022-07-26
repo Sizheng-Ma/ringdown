@@ -32,13 +32,15 @@ def set_data(M_est,chi_est,t_init):
     fit1.add_data(h_raw_strain)
     fit1.add_data(l_raw_strain)
     t_unit=M_est*2950./2/299792458
-    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82,duration=T)
+    ts_ins=0.125
+    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82, duration=T+ts_ins)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
-    #fit1.filter_data(chi_est,M_est,2,2,1)
+    fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
-    fit1.condition_data(ds=1, flow=20)
+    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
+    #fit1.condition_data(ds=1, flow=20)
     fit1.compute_acfs()
     wd1 = fit1.analysis_data
     return fit1,wd1
@@ -61,19 +63,31 @@ def total(M_est,chi_est,t_init):
     likelihood=compute_likelihood(fit1,wd1)
     return likelihood
 
-t_init=0.84
+#t_init=0.8
 
-chispace=np.arange(0.0,0.95,0.005)
-massspace=np.arange(34,100,0.1)
+chispace=np.arange(0.0,0.95,0.02)
+massspace=np.arange(34,240,0.5)
 X, Y = np.meshgrid(massspace,chispace)
-finalfinal=[]
-for j in chispace:
-    final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
-    finalfinal.append(final)
-finalfinal=np.array(finalfinal)
-finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
-mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
-spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
-epsilong=np.sqrt(((mass_max-68.5)/68.5)**2+(spin_max-0.69)**2)
-print(epsilong)
-np.savetxt('rest/t_'+str(t_init),finalfinal)
+mass_max_clu=[]
+spin_max_clu=[]
+bayes_clu=[]
+distance=[]
+tssss=np.arange(80,104,1.)
+for t_init in tssss:
+        finalfinal=[]
+        print(t_init)
+        for j in chispace:
+            final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
+            finalfinal.append(final)
+        finalfinal=np.array(finalfinal)
+        bayes=np.sum(np.exp(finalfinal))
+        finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
+        mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        mass_max_clu.append(mass_max)
+        spin_max_clu.append(spin_max)
+        bayes_clu.append(bayes)
+np.savetxt('time_rest/mass6_overtone',mass_max_clu)
+np.savetxt('time_rest/spin6_overtone',spin_max_clu)
+np.savetxt('time_rest/tinit6_overtone',tssss)
+np.savetxt('time_rest/bayes6_overtone',bayes_clu)

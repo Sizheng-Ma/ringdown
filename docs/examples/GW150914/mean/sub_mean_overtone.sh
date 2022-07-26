@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH -J 7
-#SBATCH -o time_rest/7out
+#SBATCH -o time_rest/7out1
 #SBATCH -e time_rest/error.txt
 #SBATCH -N 1
 #SBATCH -n 24
@@ -10,4 +10,4 @@
 ##SBATCH -p debug
 
 source activate ringdown
-~/.conda/envs/ringdown/bin/python3 mean_overtone3.py
+~/.conda/envs/ringdown/bin/python3 -u mean_overtone6.py
