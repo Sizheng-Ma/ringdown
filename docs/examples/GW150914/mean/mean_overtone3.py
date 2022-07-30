@@ -41,26 +41,32 @@ def set_data(M_est,chi_est,t_init):
 #     fit1.filter_data(chi_est,M_est,2,2,3)
     fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
     #fit1.condition_data(ds=1, flow=20)
-    fit1.compute_acfs()
     wd1 = fit1.analysis_data
     return fit1,wd1
 
-def compute_likelihood(fit1,wd1):
+def compute_L_inv(fit1):
+    fit1.compute_acfs()
     Ls=fit1.obtain_L()
+    Ls_inv=[]
+    for i in range(len(Ls)):
+        norm=np.sqrt(np.sum(abs(np.dot(np.linalg.inv(Ls[i]),Ls[i])-np.identity(len(Ls[i])))**2))
+        if abs(norm)>1e-8:
+            raise ValueError("inverse of L is not correct")
+        Ls_inv.append(np.linalg.inv(Ls[i]))
+    return np.array(Ls_inv)
+
+def compute_likelihood(wd1,Ls_inv):
     strains=np.array([s.values for s in wd1.values()])
     times=np.array([array(d.time) for d in wd1.values()])
     likelihood=0
     for i in range(len(strains)):
-        norm=np.sqrt(np.sum(abs(np.dot(np.linalg.inv(Ls[i]),Ls[i])-np.identity(len(Ls[i])))**2))
-        if abs(norm)>1e-8:
-            raise ValueError("inverse of L is not correct")
-        whitened=np.dot(np.linalg.inv(Ls[i]),strains[i])
+        whitened=np.dot(Ls_inv[i],strains[i])
         likelihood-=0.5*np.dot(whitened,whitened)
     return likelihood
 
-def total(M_est,chi_est,t_init):
+def total(Ls_inv,M_est,chi_est,t_init):
     fit1,wd1=set_data(M_est,chi_est,t_init)
-    likelihood=compute_likelihood(fit1,wd1)
+    likelihood=compute_likelihood(wd1,Ls_inv)
     return likelihood
 
 #t_init=0.8
@@ -76,8 +82,10 @@ tssss=np.arange(20,32,0.5)
 for t_init in tssss:
         finalfinal=[]
         print(t_init)
+        fit,_=set_data(massspace[0],chispace[0],t_init)
+        Ls_inv=compute_L_inv(fit)
         for j in chispace:
-            final=Parallel(n_jobs=24)(delayed(total)(i,j,t_init) for i in massspace)
+            final=Parallel(n_jobs=24)(delayed(total)(Ls_inv,i,j,t_init) for i in massspace)
             finalfinal.append(final)
         finalfinal=np.array(finalfinal)
         bayes=np.sum(np.exp(finalfinal))
