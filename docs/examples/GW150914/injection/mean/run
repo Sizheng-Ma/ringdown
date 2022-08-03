@@ -1,0 +1,24 @@
+#!/bin/bash
+str1='0.0003'
+str2='0.08'
+sed -i "s/distance=${str1}/distance=${str2}/" mean1.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean2.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean3.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean_overtone1.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean_overtone2.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean_overtone3.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean_overtone_overtone1.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean_overtone_overtone2.py
+sed -i "s/distance=${str1}/distance=${str2}/" mean_overtone_overtone3.py
+
+sbatch sub_mean_overtone1.sh
+sbatch sub_mean_overtone2.sh
+sbatch sub_mean_overtone3.sh
+
+sbatch sub_mean1.sh
+sbatch sub_mean2.sh
+sbatch sub_mean3.sh
+
+sbatch sub_mean_overtone_overtone1.sh
+sbatch sub_mean_overtone_overtone2.sh
+sbatch sub_mean_overtone_overtone3.sh

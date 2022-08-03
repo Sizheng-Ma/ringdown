@@ -10,4 +10,4 @@
 #SBATCH -p debug
 
 source activate ringdown
-~/.conda/envs/ringdown/bin/python3 -u mean1.py
+~/.conda/envs/ringdown/bin/python3 -u mean4.py

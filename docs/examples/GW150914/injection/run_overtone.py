@@ -104,6 +104,7 @@ def set_data(M_est,chi_est,t_init,add_filter):
     
     if add_filter:
         fit1.filter_data(chi_est,M_est,2,2,0)
+        fit1.filter_data(chi_est,M_est,2,2,1)
     wd1 = fit1.analysis_data
     return fit1,wd1
 
@@ -164,5 +165,5 @@ for j in chispace:
     final=Parallel(n_jobs=24)(delayed(total)(Ls_inv,i,j,t_init,True) for i in massspace)
     finalfinal.append(final)
 finalfinal=np.array(finalfinal)
-np.savetxt('rest/t_'+str(t_init)+'_'+str(disdis),finalfinal)
+np.savetxt('rest/overtone_t_'+str(t_init)+'_'+str(disdis),finalfinal)
 np.savetxt('rest/snr_'+str(t_init)+'_'+str(disdis),np.array([snr]))

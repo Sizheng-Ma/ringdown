@@ -112,7 +112,7 @@ X, Y = np.meshgrid(massspace,chispace)
 mass_max_clu=[]
 spin_max_clu=[]
 bayes_clu=[]
-tssss=np.arange(-5,8,0.5)
+tssss=np.arange(80,104,1.)
 for t_init in tssss:
         print(t_init)
         fit,_=set_data(massspace[0],chispace[0],t_init)
@@ -130,7 +130,7 @@ for t_init in tssss:
         mass_max_clu.append(mass_max)
         spin_max_clu.append(spin_max)
         bayes_clu.append(bayes)
-np.savetxt('time_rest/mass1',mass_max_clu)
-np.savetxt('time_rest/spin1',spin_max_clu)
-np.savetxt('time_rest/tinit1',tssss)
-np.savetxt('time_rest/bayes1',bayes_clu)
+np.savetxt('time_rest/mass6',mass_max_clu)
+np.savetxt('time_rest/spin6',spin_max_clu)
+np.savetxt('time_rest/tinit6',tssss)
+np.savetxt('time_rest/bayes6',bayes_clu)

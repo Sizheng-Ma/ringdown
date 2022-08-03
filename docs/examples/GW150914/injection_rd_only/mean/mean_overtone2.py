@@ -46,7 +46,7 @@ def set_data(M_est,chi_est,t_init):
     fit1.set_target(0-ts_ins, ra=1.95, dec=-1.27, psi=0.82, duration=T+ts_ins)
     #fit1.condition_data(ds=int(round(data.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
-#     fit1.filter_data(chi_est,M_est,2,2,1)
+    fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
     fit1.set_target(0+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
@@ -112,7 +112,7 @@ X, Y = np.meshgrid(massspace,chispace)
 mass_max_clu=[]
 spin_max_clu=[]
 bayes_clu=[]
-tssss=np.arange(-5,8,0.5)
+tssss=np.arange(8,20,0.5)
 for t_init in tssss:
         print(t_init)
         fit,_=set_data(massspace[0],chispace[0],t_init)
@@ -130,7 +130,7 @@ for t_init in tssss:
         mass_max_clu.append(mass_max)
         spin_max_clu.append(spin_max)
         bayes_clu.append(bayes)
-np.savetxt('time_rest/mass1',mass_max_clu)
-np.savetxt('time_rest/spin1',spin_max_clu)
-np.savetxt('time_rest/tinit1',tssss)
-np.savetxt('time_rest/bayes1',bayes_clu)
+np.savetxt('time_rest/mass2_overtone',mass_max_clu)
+np.savetxt('time_rest/spin2_overtone',spin_max_clu)
+np.savetxt('time_rest/tinit2_overtone',tssss)
+np.savetxt('time_rest/bayes2_overtone',bayes_clu)

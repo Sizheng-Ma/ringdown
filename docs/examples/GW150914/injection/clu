@@ -1,0 +1,8 @@
+#!/bin/bash
+str1='1'
+str2='2'
+sed -i "s/t_init=${str1}/t_init=${str2}/" run.py
+sed -i "s/t_init=${str1}/t_init=${str2}/" run_overtone.py
+
+sbatch sub.sh
+sbatch sub_overtone.sh

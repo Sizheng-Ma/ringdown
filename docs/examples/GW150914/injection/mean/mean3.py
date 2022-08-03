@@ -91,19 +91,18 @@ def inject_gau(distance,M_tot):
     
     fpsi422=np.fft.rfft(h_int['plus'],norm='ortho')
     ffreq=np.fft.rfftfreq(len(signal),d=(tfinal[1]-tfinal[0])/(Mf*t_unit))*2*np.pi
-    return tfinal,signal,h_int['plus'],t_unit
+    return tfinal,signal,ffreq,fpsi422,t_unit
 
-def set_data(M_est,chi_est,t_init,add_filter):
+def set_data(M_est,chi_est,t_init):
     fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 1)])
-    fit1.add_data(h_raw_strain)
+    fit1.add_data(h_raw_strain, acf=acf)
 
     T = 0.2
     srate = 2048
     fit1.set_target(t_init*1e-3, duration=T)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)),flow=20)
-    
-    if add_filter:
-        fit1.filter_data(chi_est,M_est,2,2,0)
+
+    fit1.filter_data(chi_est,M_est,2,2,0)
     wd1 = fit1.analysis_data
     return fit1,wd1
 
@@ -127,42 +126,41 @@ def compute_likelihood(wd1,Ls_inv):
         likelihood-=0.5*np.dot(whitened,whitened)
     return likelihood
 
-def total(Ls_inv,M_est,chi_est,t_init,add_filter):
-    fit1,wd1=set_data(M_est,chi_est,t_init,add_filter)
+def total(Ls_inv,M_est,chi_est,t_init):
+    fit1,wd1=set_data(M_est,chi_est,t_init)
     likelihood=compute_likelihood(wd1,Ls_inv)
     return likelihood
 
-def compute_snr(fit):
-    Ls=fit.obtain_L()
-    norm=np.sqrt(np.sum(abs(np.dot(np.linalg.inv(Ls[0]),Ls[0])-np.identity(len(Ls[0])))**2))
-    if abs(norm)>1e-8:
-        raise ValueError("inverse of L is not correct")
-    Ls_inv=np.linalg.inv(Ls[0])
-    wd = fit.analysis_data
-    whitten_data=dot(Ls_inv,wd[None])
-    whitten_signal=dot(Ls_inv,pure_nr_strain[wd[None].time])
-    injsnr_mf = dot(whitten_signal, whitten_data) / linalg.norm(whitten_signal)
-    return injsnr_mf
-
 Mf=0.952032939704
 M_est_total=68.5/Mf
-disdis=0.05
-tfinal,signal,pure_nr,t_unit=inject_gau(distance=disdis,M_tot=M_est_total)
-t_init=2
+tfinal,signal,ffreq,fpsi422,t_unit=inject_gau(distance=0.08,M_tot=M_est_total)
 h_raw_strain =ringdown.Data(signal, index=tfinal)
-pure_nr_strain =ringdown.Data(pure_nr, index=tfinal)
 
-chispace=np.arange(0.0,0.95,0.005)
-massspace=np.arange(34,100,0.2)
-finalfinal=[]
+chispace=np.arange(0.0,0.95,0.02)
+massspace=np.arange(34,240,0.5)
+X, Y = np.meshgrid(massspace,chispace)
+mass_max_clu=[]
+spin_max_clu=[]
+bayes_clu=[]
 
-fit,_=set_data(massspace[0],chispace[0],t_init,False)
-Ls_inv=compute_L_inv(fit)
-snr=compute_snr(fit)
-print(snr)
-for j in chispace:
-    final=Parallel(n_jobs=24)(delayed(total)(Ls_inv,i,j,t_init,True) for i in massspace)
-    finalfinal.append(final)
-finalfinal=np.array(finalfinal)
-np.savetxt('rest/t_'+str(t_init)+'_'+str(disdis),finalfinal)
-np.savetxt('rest/snr_'+str(t_init)+'_'+str(disdis),np.array([snr]))
+tssss=np.arange(20,32,0.5)
+for t_init in tssss:
+        finalfinal=[]
+        print(t_init) 
+        fit,_=set_data(massspace[0],chispace[0],t_init)
+        Ls_inv=compute_L_inv(fit)
+        for j in chispace:
+            final=Parallel(n_jobs=24)(delayed(total)(Ls_inv,i,j,t_init) for i in massspace)
+            finalfinal.append(final)
+        finalfinal=np.array(finalfinal)
+        bayes=np.sum(np.exp(finalfinal))
+        finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
+        mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        spin_max=np.sum((Y.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
+        mass_max_clu.append(mass_max)
+        spin_max_clu.append(spin_max)
+        bayes_clu.append(bayes)
+np.savetxt('time_rest/mass3',mass_max_clu)
+np.savetxt('time_rest/spin3',spin_max_clu)
+np.savetxt('time_rest/tinit3',tssss)
+np.savetxt('time_rest/bayes3',bayes_clu)

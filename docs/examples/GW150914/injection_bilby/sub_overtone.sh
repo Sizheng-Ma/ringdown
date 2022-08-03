@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH -J injection/fun
+#SBATCH -J injection/overtone
 #SBATCH -o rest/7out
 #SBATCH -e rest/error.txt
 #SBATCH -N 1
@@ -10,4 +10,4 @@
 #SBATCH -p debug
 
 source activate ringdown
-~/.conda/envs/ringdown/bin/python3 run.py
+~/.conda/envs/ringdown/bin/python3 run_overtone.py

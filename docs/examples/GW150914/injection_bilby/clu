@@ -1,0 +1,10 @@
+#!/bin/bash
+str1='3.6'
+str2='0.36'
+#sed -i "s/t_init=${str1}/t_init=${str2}/" run.py
+#sed -i "s/t_init=${str1}/t_init=${str2}/" run_overtone.py
+sed -i "s/disdis=${str1}/disdis=${str2}/" run.py
+sed -i "s/disdis=${str1}/disdis=${str2}/" run_overtone.py
+
+sbatch sub.sh
+sbatch sub_overtone.sh
