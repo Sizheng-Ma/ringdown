@@ -1,0 +1,14 @@
+#!/bin/bash
+sbatch sub_mean_overtone1.sh
+sbatch sub_mean_overtone2.sh
+sbatch sub_mean_overtone3.sh
+sbatch sub_mean_overtone4.sh
+sbatch sub_mean_overtone5.sh
+sbatch sub_mean_overtone6.sh
+
+sbatch sub_mean1.sh
+sbatch sub_mean2.sh
+sbatch sub_mean3.sh
+sbatch sub_mean4.sh
+sbatch sub_mean5.sh
+sbatch sub_mean6.sh

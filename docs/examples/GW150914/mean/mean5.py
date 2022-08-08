@@ -33,13 +33,12 @@ def set_data(M_est,chi_est,t_init):
     fit1.add_data(l_raw_strain)
     t_unit=M_est*2950./2/299792458
     ts_ins=0.125
-    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82, duration=T+ts_ins)
+    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
     #fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
-    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
     #fit1.condition_data(ds=1, flow=20)
     wd1 = fit1.analysis_data
     return fit1,wd1
@@ -57,7 +56,7 @@ def compute_L_inv(fit1):
 
 def compute_likelihood(wd1,Ls_inv):
     strains=np.array([s.values for s in wd1.values()])
-    times=np.array([array(d.time) for d in wd1.values()])
+    times=np.array([np.array(d.time) for d in wd1.values()])
     likelihood=0
     for i in range(len(strains)):
         whitened=np.dot(Ls_inv[i],strains[i])
@@ -78,6 +77,8 @@ mass_max_clu=[]
 spin_max_clu=[]
 bayes_clu=[]
 distance=[]
+mass_peak_clu=[]
+chi_peak_clu=[]
 tssss=np.arange(56,80,1.)
 for t_init in tssss:
         finalfinal=[]
@@ -88,6 +89,10 @@ for t_init in tssss:
             final=Parallel(n_jobs=24)(delayed(total)(Ls_inv,i,j,t_init) for i in massspace)
             finalfinal.append(final)
         finalfinal=np.array(finalfinal)
+        mass_peak=X.flatten()[np.argmax(finalfinal)]
+        chi_peak=Y.flatten()[np.argmax(finalfinal)]
+        mass_peak_clu.append(mass_peak)
+        chi_peak_clu.append(chi_peak)
         bayes=np.sum(np.exp(finalfinal))
         finalfinalnorm=finalfinal.flatten()-np.max(finalfinal.flatten())
         mass_max=np.sum((X.flatten())*np.exp(finalfinalnorm)/np.sum(np.exp(finalfinalnorm)))
@@ -99,3 +104,5 @@ np.savetxt('time_rest/mass5',mass_max_clu)
 np.savetxt('time_rest/spin5',spin_max_clu)
 np.savetxt('time_rest/tinit5',tssss)
 np.savetxt('time_rest/bayes5',bayes_clu)
+np.savetxt('time_rest/mass_peak5',mass_peak_clu)
+np.savetxt('time_rest/chi_peak5',chi_peak_clu)
