@@ -33,13 +33,12 @@ def set_data(M_est,chi_est,t_init):
     fit1.add_data(l_raw_strain)
     t_unit=M_est*2950./2/299792458
     ts_ins=0.125
-    fit1.set_target(1126259462.4083147-ts_ins, ra=1.95, dec=-1.27, psi=0.82, duration=T+ts_ins)
+    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)), flow=20)
     fit1.filter_data(chi_est,M_est,2,2,0)
     fit1.filter_data(chi_est,M_est,2,2,1)
 #     fit1.filter_data(chi_est,M_est,2,2,2)
 #     fit1.filter_data(chi_est,M_est,2,2,3)
-    fit1.set_target(1126259462.4083147+t_init*1e-3, ra=1.95, dec=-1.27, psi=0.82, duration=T)
     #fit1.condition_data(ds=1, flow=20)
     wd1 = fit1.analysis_data
     return fit1,wd1
@@ -57,7 +56,7 @@ def compute_L_inv(fit1):
 
 def compute_likelihood(wd1,Ls_inv):
     strains=np.array([s.values for s in wd1.values()])
-    times=np.array([array(d.time) for d in wd1.values()])
+    times=np.array([np.array(d.time) for d in wd1.values()])
     likelihood=0
     for i in range(len(strains)):
         whitened=np.dot(Ls_inv[i],strains[i])
@@ -69,7 +68,7 @@ def total(Ls_inv,M_est,chi_est,t_init):
     likelihood=compute_likelihood(wd1,Ls_inv)
     return likelihood
 
-t_init=0.77
+t_init=6.0
 
 chispace=np.arange(0.0,0.95,0.005)
 massspace=np.arange(34,100,0.1)
