@@ -94,7 +94,7 @@ def inject_gau(distance,M_tot):
     return tfinal,signal,h_int['plus'],t_unit
 
 def set_data(M_est,chi_est,t_init,add_filter):
-    fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 1)])
+    fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 0)])
     fit1.add_data(h_raw_strain)
 
     T = 0.2
@@ -132,33 +132,41 @@ def total(Ls_inv,M_est,chi_est,t_init,add_filter):
     likelihood=compute_likelihood(wd1,Ls_inv)
     return likelihood
 
-def compute_snr(fit):
-    Ls=fit.obtain_L()
-    norm=np.sqrt(np.sum(abs(np.dot(np.linalg.inv(Ls[0]),Ls[0])-np.identity(len(Ls[0])))**2))
-    if abs(norm)>1e-8:
-        raise ValueError("inverse of L is not correct")
-    Ls_inv=np.linalg.inv(Ls[0])
-    wd = fit.analysis_data
-    whitten_data=dot(Ls_inv,wd[None])
-    whitten_signal=dot(Ls_inv,pure_nr_strain[wd[None].time])
+def compute_snr(wd,Ls_inv):
+    whitten_data=dot(Ls_inv[0],wd[None])
+    whitten_signal=dot(Ls_inv[0],pure_nr_strain[wd[None].time])
     injsnr_mf = dot(whitten_signal, whitten_data) / linalg.norm(whitten_signal)
     return injsnr_mf
 
+def set_noise(t_init):
+    fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 0)])
+    fit1.add_data(noise)
+
+    T = 0.2
+    srate = 2048
+    fit1.set_target(t_init*1e-3, duration=T)
+    fit1.condition_data(ds=int(round(noise.fsamp/srate)),flow=20)
+
+    wd1 = fit1.analysis_data
+    return fit1,wd1
+
 Mf=0.952032939704
 M_est_total=68.5/Mf
-disdis=0.05
+disdis=0.0889
 tfinal,signal,pure_nr,t_unit=inject_gau(distance=disdis,M_tot=M_est_total)
-t_init=2
+t_init=6.8
 h_raw_strain =ringdown.Data(signal, index=tfinal)
 pure_nr_strain =ringdown.Data(pure_nr, index=tfinal)
+noise =ringdown.Data(signal-pure_nr, index=tfinal)
 
 chispace=np.arange(0.0,0.95,0.005)
 massspace=np.arange(34,100,0.2)
 finalfinal=[]
 
-fit,_=set_data(massspace[0],chispace[0],t_init,False)
+fit,_=set_noise(t_init)
 Ls_inv=compute_L_inv(fit)
-snr=compute_snr(fit)
+_,wd=set_data(massspace[0],chispace[0],t_init,False)
+snr=compute_snr(wd,Ls_inv)
 print(snr)
 for j in chispace:
     final=Parallel(n_jobs=24)(delayed(total)(Ls_inv,i,j,t_init,True) for i in massspace)

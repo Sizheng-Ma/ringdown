@@ -1,8 +1,12 @@
 #!/bin/bash
-str1='1'
-str2='2'
+str1='2'
+str2='3'
 sed -i "s/t_init=${str1}/t_init=${str2}/" run.py
 sed -i "s/t_init=${str1}/t_init=${str2}/" run_overtone.py
+str3='0.0889'
+str4='0.0889'
+sed -i "s/disdis=${str3}/disdis=${str4}/" run.py
+sed -i "s/disdis=${str3}/disdis=${str4}/" run_overtone.py
 
 sbatch sub.sh
 sbatch sub_overtone.sh
