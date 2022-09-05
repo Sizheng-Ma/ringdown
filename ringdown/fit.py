@@ -522,6 +522,19 @@ class Fit(object):
         for k, d in self.data.items():
             new_data[k] = d.apply_filter(chi,mass,l,m,n,**kwargs)
         self.data = new_data
+    def filter_data_reim(self,re,im, **kwargs):
+        """Condition data for all detectors by calling
+        :meth:`ringdown.data.Data.condition`. Docstring for that function
+        below.
+
+        The `preserve_acfs` argument determines whether to preserve original
+        ACFs in fit after conditioning.
+
+        """
+        new_data = {}
+        for k, d in self.data.items():
+            new_data[k] = d.apply_filter_reim(re,im,**kwargs)
+        self.data = new_data
     def condition_data(self, preserve_acfs=False, **kwargs):
         """Condition data for all detectors by calling
         :meth:`ringdown.data.Data.condition`. Docstring for that function
