@@ -1,5 +1,5 @@
 #!/bin/bash
-str1='0.0889'
+str1='0.0028'
 str2='1000000'
 sed -i "s/disdis=${str1}/disdis=${str2}/" mean1.py
 sed -i "s/disdis=${str1}/disdis=${str2}/" mean2.py

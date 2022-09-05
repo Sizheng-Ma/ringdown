@@ -77,8 +77,8 @@ def inject_gau(distance,M_tot):
     sampling_frequency = 16384.
 
     
-    iota=np.pi/3
-    beta=np.pi/3*0
+    iota=-np.pi
+    beta=np.pi/3*1
 
     tpad,h2pad=load_data(iota,beta,t_unit)
     
@@ -86,7 +86,7 @@ def inject_gau(distance,M_tot):
     h_int=NR_injection_into_Bilby(tfinal,tpad,h2pad,M_tot,solar_to_distance,dis)
     
     rng = np.random.default_rng(12345)
-    signal=h_int['plus']+ rng.normal(0, 1, len(tfinal))
+    signal=h_int['plus']+ rng.normal(0, 46, len(tfinal))
 
     
     fpsi422=np.fft.rfft(h_int['plus'],norm='ortho')
@@ -97,8 +97,8 @@ def set_data(M_est,chi_est,t_init,add_filter):
     fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 0)])
     fit1.add_data(h_raw_strain)
 
-    T = 0.2
-    srate = 2048
+    T = 0.08
+    srate = 2048*2
     fit1.set_target(t_init*1e-3, duration=T)
     fit1.condition_data(ds=int(round(h_raw_strain.fsamp/srate)),flow=20)
     
@@ -143,8 +143,8 @@ def set_noise(t_init):
     fit1 = ringdown.Fit(model='mchi_aligned', modes=[(1, -2, 2, 2, 0)])
     fit1.add_data(noise)
 
-    T = 0.2
-    srate = 2048
+    T = 0.08
+    srate = 2048*2
     fit1.set_target(t_init*1e-3, duration=T)
     fit1.condition_data(ds=int(round(noise.fsamp/srate)),flow=20)
 
