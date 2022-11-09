@@ -303,15 +303,27 @@ class Data(TimeSeries):
     def _fac(ffreq,l,m,n,chi):
         ome=qnm.modes_cache(s=-2,l=l,m=m,n=n)(a=chi)[0]
         return (ffreq-ome)/(ffreq-np.conj(ome))*(ffreq+np.conj(ome))/(ffreq+ome)
-    def apply_filter(self,chi,mass,n):
+    @staticmethod
+    def _fac_reim(ffreq,re,im):
+        ome=re+1j*im
+        return (ffreq-ome)/(ffreq-np.conj(ome))*(ffreq+np.conj(ome))/(ffreq+ome)
+    def apply_filter(self,chi,mass,l,m,n):
         raw_data = self.values
         raw_time = self.index.values
-        fpsi422=np.fft.ifft(raw_data,norm='ortho')
+        fpsi422=np.fft.rfft(raw_data,norm='ortho')
         t_unit=mass*2950./2/299792458
-        ffreq=np.fft.fftfreq(len(fpsi422),d=self.delta_t/t_unit)*2*np.pi
-        cond_data=np.real(np.fft.fft(self._fac(ffreq,2,2,n,chi)*fpsi422,norm='ortho'))
+        ffreq=np.fft.rfftfreq(len(raw_data),d=self.delta_t/t_unit)*2*np.pi
+        cond_data=np.fft.irfft(self._fac(-ffreq,l,m,n,chi)*fpsi422,norm='ortho',n=len(raw_data))
         cond_time=raw_time + 0.0*t_unit
         return Data(cond_data, index=cond_time, ifo=self.ifo)
+
+    def apply_filter_reim(self,re,im):
+        raw_data = self.values
+        raw_time = self.index.values
+        fpsi422=np.fft.rfft(raw_data,norm='ortho')
+        ffreq=np.fft.rfftfreq(len(raw_data),d=self.delta_t)*2*np.pi
+        cond_data=np.fft.irfft(self._fac_reim(-ffreq,re,im)*fpsi422,norm='ortho',n=len(raw_data))
+        return Data(cond_data, index=raw_time, ifo=self.ifo)
 
     def condition(self, t0=None, ds=None, flow=None, fhigh=None, trim=0.25,
                   digital_filter=False, remove_mean=True, decimate_kws=None,
