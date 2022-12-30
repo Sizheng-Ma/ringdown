@@ -15,6 +15,9 @@ import pandas as pd
 import h5py
 import os
 import logging
+import qnm
+import numpy as np
+from . import qnms
 
 class Series(pd.Series):
     """ A wrapper of :class:`pandas.Series` with some additional functionality.
@@ -296,6 +299,50 @@ class Data(TimeSeries):
         else:
             d = None
         return d
+
+
+    @staticmethod
+    def _fac(ffreq, l, m, n, chi) -> float:
+        """Compute the rational filter
+        """
+        omega = qnm.modes_cache(s=-2, l=l, m=m, n=n)(a=chi)[0]
+        return (ffreq-omega)/(ffreq-np.conj(omega))\
+                *(ffreq+np.conj(omega))/(ffreq+omega)
+
+    def apply_filter(self, chi, mass, modes):
+        """Condition data.
+
+        Arguments
+        ---------
+        chi : float
+            remnant dimensionaless spin
+        mass : float
+            remnant mass, in solar mass
+        modes : list
+            list of (p, s, l, m, n) tuples identifying modes to be
+            filtered.
+
+        Returns
+        -------
+        cond_data : Data
+            filtered data object.
+        """
+        raw_data = self.values
+        raw_time = self.index.values
+
+        t_unit = mass * 2950./2/299792458 # convert solar mass to second
+
+        # FFT
+        fpsi422 = np.fft.rfft(raw_data, norm='ortho')
+        ffreq = np.fft.rfftfreq(len(raw_data), d=self.delta_t/t_unit) * 2 * np.pi
+
+        modes_list = qnms.construct_mode_list(modes)
+        # Construct the rational filter
+        tot_filter = 1
+        for mode in modes_list:
+            tot_filter *= self._fac(-ffreq, mode.l, mode.m, mode.n, chi)
+        filtered_data = np.fft.irfft(tot_filter*fpsi422, norm='ortho', n=len(raw_data))
+        return Data(filtered_data, index=raw_time, ifo=self.ifo)
 
     def condition(self, t0=None, ds=None, flow=None, fhigh=None, trim=0.25,
                   digital_filter=False, remove_mean=True, decimate_kws=None,

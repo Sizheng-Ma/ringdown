@@ -19,10 +19,11 @@ import pymc as pm
 from . import qnms
 import warnings
 from . import waveforms
+import numpy as np
 
 Target = namedtuple('Target', ['t0', 'ra', 'dec', 'psi'])
 
-MODELS = ('ftau', 'mchi', 'mchi_aligned', 'mchiq')
+MODELS = ('ftau', 'mchi', 'mchi_aligned', 'mchiq', 'filter')
 
 class Fit(object):
     """ A ringdown fit. Contains all the information required to setup and run
@@ -267,6 +268,12 @@ class Fit(object):
                 raise ValueError('{} is not a valid model argument.'
                                  'Valid options are: {}'.format(k, valid_keys))
 
+    def obtain_L(self):
+        """Compute the Cholesky-decomposition of the covariance matrix.
+        """
+        Ls=[a.iloc[:self.n_analyze].cholesky for a in self.acfs.values()]
+        return np.array(Ls)
+
     @property
     def model_input(self) -> dict:
         """Arguments to be passed to sampler.
@@ -493,6 +500,15 @@ class Fit(object):
             deep copy of `Fit`.
         """
         return cp.deepcopy(self)
+
+    def filter_data(self, chi, mass, modes, **kwargs):
+        """Filter data for all detectors by calling
+        :meth:`ringdown.data.Data.apply_filter`.
+        """
+        new_data = {}
+        for k, d in self.data.items():
+            new_data[k] = d.apply_filter(chi, mass, modes, **kwargs)
+        self.data = new_data
 
     def condition_data(self, preserve_acfs=False, **kwargs):
         """Condition data for all detectors by calling
